@@ -1,0 +1,75 @@
+import math
+import re
+import hashlib
+
+# Function to calculate entropy
+def calculate_entropy(password):
+    charset = 0
+    if re.search(r'[a-z]', password):  # lowercase
+        charset += 26
+    if re.search(r'[A-Z]', password):  # uppercase
+        charset += 26
+    if re.search(r'\d', password):  # digits
+        charset += 10
+    if re.search(r'[^a-zA-Z0-9]', password):  # special chars
+        charset += 32  # roughly count of printable symbols
+
+    # Shannon entropy formula: H = L * log2(N)
+    if charset == 0:
+        return 0
+    entropy = len(password) * math.log2(charset)
+    return entropy
+
+
+# Function to analyze password
+def analyze_password(password):
+    entropy = calculate_entropy(password)
+
+    # Determine strength level
+    if entropy < 28:
+        strength = "Very Weak"
+    elif entropy < 36:
+        strength = "Weak"
+    elif entropy < 60:
+        strength = "Reasonable"
+    elif entropy < 128:
+        strength = "Strong"
+    else:
+        strength = "Very Strong"
+
+    # Suggestions for improvement
+    suggestions = []
+    if len(password) < 8:
+        suggestions.append("Increase password length (at least 8–12 characters).")
+    if not re.search(r'[A-Z]', password):
+        suggestions.append("Add uppercase letters (A–Z).")
+    if not re.search(r'[a-z]', password):
+        suggestions.append("Add lowercase letters (a–z).")
+    if not re.search(r'\d', password):
+        suggestions.append("Add numbers (0–9).")
+    if not re.search(r'[^a-zA-Z0-9]', password):
+        suggestions.append("Add special characters (@, #, $, %, etc.).")
+
+    # Generate hashed version (to show secure storage concept)
+    hashed_password = hashlib.sha256(password.encode()).hexdigest()
+
+    # Display results
+    print("\n--- PASSWORD ANALYSIS REPORT ---")
+    print(f"Password Entered : {password}")
+    print(f"Entropy Value     : {entropy:.2f} bits")
+    print(f"Strength Level    : {strength}")
+    print(f"SHA-256 Hash      : {hashed_password}")
+    print("--------------------------------")
+
+    if suggestions:
+        print("Suggestions to improve your password:")
+        for s in suggestions:
+            print(" -", s)
+    else:
+        print("✅ Your password is very strong and secure!")
+
+# Main Program
+if __name__ == "__main__":
+    print("🔐 PASSWORD STRENGTH ANALYZER 🔐")
+    user_password = input("Enter your password to analyze: ")
+    analyze_password(user_password)
